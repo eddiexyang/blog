@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.xyang.site","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"always","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="C++ 17 introduced a new keyword if constexpr. While we may need a for constexpr, however, there are no such keywords provided. This article is a guide on how to implement such a feature with C++ templ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Implement a For Constexpr in C++">
+<meta property="og:url" content="https://blog.xyang.site/2024/12/22/implement-a-for-constexpr-in-cxx/index.html">
+<meta property="og:site_name" content="Xingyu on Tech">
+<meta property="og:description" content="C++ 17 introduced a new keyword if constexpr. While we may need a for constexpr, however, there are no such keywords provided. This article is a guide on how to implement such a feature with C++ templ">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-12-22T06:47:55.000Z">
+<meta property="article:modified_time" content="2024-12-22T08:34:11.241Z">
+<meta property="article:author" content="Xingyu Yang">
+<meta property="article:tag" content="C++">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://blog.xyang.site/2024/12/22/implement-a-for-constexpr-in-cxx/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://blog.xyang.site/2024/12/22/implement-a-for-constexpr-in-cxx/","path":"2024/12/22/implement-a-for-constexpr-in-cxx/","title":"Implement a For Constexpr in C++"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Implement a For Constexpr in C++ | Xingyu on Tech</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Xingyu on Tech</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about-me"><a href="https://xyang.site/" rel="section" target="_blank"><i class="fa fa-user fa-fw"></i>About Me</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Some-Template-Functions"><span class="nav-number">2.</span> <span class="nav-text">Some Template Functions</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#std-forward"><span class="nav-number">2.1.</span> <span class="nav-text">std::forward</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#std-integral-constant"><span class="nav-number">2.2.</span> <span class="nav-text">std::integral_constant</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Our-For-Constexpr"><span class="nav-number">3.</span> <span class="nav-text">Our For Constexpr</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Xingyu Yang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://blog.xyang.site/2024/12/22/implement-a-for-constexpr-in-cxx/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Xingyu Yang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xingyu on Tech">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Implement a For Constexpr in C++ | Xingyu on Tech">
+      <meta itemprop="description" content="C++ 17 introduced a new keyword if constexpr. While we may need a for constexpr, however, there are no such keywords provided. This article is a guide on how to implement such a feature with C++ template.">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Implement a For Constexpr in C++
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2024-12-22 14:47:55 / Modified: 16:34:11" itemprop="dateCreated datePublished" datetime="2024-12-22T14:47:55+08:00">2024-12-22</time>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">C++ 17 introduced a new keyword if constexpr. While we may need a for constexpr, however, there are no such keywords provided. This article is a guide on how to implement such a feature with C++ template.</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p>C++ 17 introduced a new feature, namely <code>if constexpr</code>. Unlike prior <code>if</code> statements, <code>if constexpr</code> is evaluated at compile time and the body will be compiled only when the condition evaluates to true. In other words, the body of <code>if constexpr</code> statement will not be compiled and will be discarded when the condition evaluates to false. This feature requires that the condition of <code>if constexpr</code> is indeed a <code>constexpr</code>. Here is an example.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">if</span> <span class="title">constexpr</span> <span class="params">(<span class="literal">true</span>)</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;true&quot;</span>; <span class="comment">// compiled</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;false&quot;</span>; <span class="comment">// not compiled</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>The body of <code>else</code> will not be compiled and will be discarded at compile time.</p>
+<p>In some cases, we may want to use <code>if constexpr</code> in a <code>for</code> loop to reduce branch statements and speed up the runtime. However, C++ standards do not support <code>constexpr</code> loop variable, although obviously they should be when the range of <code>for</code> loop is determined by constants. </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    <span class="function"><span class="keyword">if</span> <span class="title">constexpr</span> <span class="params">(i != <span class="number">0</span>)</span> </span>&#123; <span class="comment">// error!</span></span><br><span class="line">        <span class="built_in">do_something</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>In the following parts of this article, I will present a method to implement a equivalent of <code>for constexpr</code>.</p>
+<h1 id="Some-Template-Functions"><a href="#Some-Template-Functions" class="headerlink" title="Some Template Functions"></a>Some Template Functions</h1><p>Before talking about the real topic, let’s first see some template functions. If you are already familiar with them, you can skip to the next section.</p>
+<h2 id="std-forward"><a href="#std-forward" class="headerlink" title="std::forward"></a>std::forward</h2><p>Suppose we have function <code>foo</code> that accepts a r-value reference. We have a overloaded function <code>print_ref_type</code> that would determine the reference type.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">void</span> <span class="title">print_ref_type</span><span class="params">(_Tp&amp;&amp; var)</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;r-value reference&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">void</span> <span class="title">print_ref_type</span><span class="params">(_Tp&amp; var)</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;l-value reference&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">void</span> <span class="title">foo</span><span class="params">(_Tp&amp;&amp; var)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">print_ref_type</span>(var);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">foo</span>(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<p>Running this piece of code gives</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">l-value reference</span><br></pre></td></tr></table></figure>
+
+<p>How? The function <code>foo</code> is indeed accepting a <code>r-value</code>! The problem is that, in the body of function <code>foo</code>, <code>var</code> is a named variable thus considered a <code>l-value</code>. That’s why <code>std::forward</code> comes, which can cast a l-value reference into a r-value reference. The implementation of <code>std::forward</code> is shown below. We can see that it accepts <code>l-value</code> reference after removing the reference of <code>_Tp</code> and getting the actual type. Then, the <code>l-value</code> reference is cast into a <code>r-value</code> reference.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span></span><br><span class="line"><span class="function">  _GLIBCXX_NODISCARD</span></span><br><span class="line"><span class="function">  <span class="keyword">constexpr</span> _Tp&amp;&amp;</span></span><br><span class="line"><span class="function">  <span class="title">forward</span><span class="params">(<span class="keyword">typename</span> std::remove_reference&lt;_Tp&gt;::type&amp; <span class="type">__t</span>)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;_Tp&amp;&amp;&gt;(<span class="type">__t</span>); &#125;</span><br></pre></td></tr></table></figure>
+
+<p>Adding the <code>std::forward</code> into our previous example finally creates the expected behavior.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">void</span> <span class="title">print_ref_type</span><span class="params">(_Tp&amp;&amp; var)</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;r-value reference&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">void</span> <span class="title">print_ref_type</span><span class="params">(_Tp&amp; var)</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;l-value reference&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">void</span> <span class="title">foo</span><span class="params">(_Tp&amp;&amp; var)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">print_ref_type</span>(std::forward&lt;_Tp&gt;(var));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">foo</span>(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r-value reference</span><br></pre></td></tr></table></figure>
+
+<h2 id="std-integral-constant"><a href="#std-integral-constant" class="headerlink" title="std::integral_constant"></a>std::integral_constant</h2><p>This feature allows us to represent a <code>constexpr</code> as a type and pass it into a function. If a function accepts a variable and we passed a <code>constexpr</code> into the function, the parameter may lose the attribute <code>constexpr</code>. std::integral_constant guarantees that a constant will still be a constant after being passed into a function. Here is an example.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">void</span> <span class="title">test</span><span class="params">(<span class="keyword">auto</span> var)</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">if</span> <span class="title">constexpr</span> <span class="params">(var)</span> </span>&#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;ok&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span> <span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">test</span>(<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Compiling this piece of code will generate an error.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">test.cpp: In instantiation of &#x27;constexpr void test(auto:1) [with auto:1 = bool]&#x27;:</span><br><span class="line">test.cpp:10:9:   required from here</span><br><span class="line">test.cpp:4:5: error: &#x27;var&#x27; is not a constant expression</span><br><span class="line">    4 |     if constexpr (var) &#123;</span><br><span class="line">      |     ^~</span><br></pre></td></tr></table></figure>
+<p>Using std::integral_constant should reduce this error.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">void</span> <span class="title">test</span><span class="params">(<span class="keyword">auto</span> var)</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">if</span> <span class="title">constexpr</span> <span class="params">(var)</span> </span>&#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;ok&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span> <span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">test</span>(std::<span class="built_in">integral_constant</span>&lt;<span class="type">bool</span>, <span class="literal">true</span>&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ok</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="Our-For-Constexpr"><a href="#Our-For-Constexpr" class="headerlink" title="Our For Constexpr"></a>Our For Constexpr</h1><p>Finally comes our <code>for constexpr</code> equivalent. Now the <code>if constexpr</code> should work in our <code>for constexpr</code> loop. Note that the body of loop is passed as a <code>lambda expression</code> into the function <code>for_constexpr</code>. The lambda expression accepts a loop index and the index can be used a constant in the loop body.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="type">int</span> Start, <span class="type">int</span> End, <span class="type">int</span> Step = <span class="number">1</span>, <span class="keyword">typename</span> F&gt;</span><br><span class="line"><span class="keyword">constexpr</span> <span class="type">void</span> for_constexpr(F&amp;&amp; f) &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">constexpr</span> (Start &lt; End) &#123;</span><br><span class="line">        <span class="built_in">f</span>(std::<span class="built_in">integral_constant</span>&lt;<span class="type">int</span>, Start&gt;());</span><br><span class="line">        for_constexpr&lt;Start + Step, End, Step&gt;(std::forward&lt;F&gt;(f));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span> <span class="params">()</span> </span>&#123;</span><br><span class="line">    for_constexpr&lt;<span class="number">1</span>, <span class="number">5</span>&gt;([&amp;](<span class="keyword">auto</span> i) &#123;</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">constexpr</span> (i &gt; <span class="number">3</span>) &#123;</span><br><span class="line">            std::cout &lt;&lt; i &lt;&lt; std::endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Some compilers may restrict template recursion depth and refuse to compile the code. We may need to specify a flag <code>-ftemplate-depth</code> when compiling the code.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g++ your_code.cpp -ftemplate-depth=1000 -o your_bin</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/C/" rel="tag"># C++</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/07/05/fundamentals_of_cuda/" rel="prev" title="Fundametals of CUDA C/C++">
+                  <i class="fa fa-angle-left"></i> Fundametals of CUDA C/C++
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class=""></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Xingyu Yang</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
