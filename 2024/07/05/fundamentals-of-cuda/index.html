@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.xyang.site","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"always","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="A beginner&#39;s guide to accelerated computing with CUDA C&#x2F;C++">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fundametals of CUDA C&#x2F;C++">
+<meta property="og:url" content="https://blog.xyang.site/2024/07/05/fundamentals-of-cuda/index.html">
+<meta property="og:site_name" content="Xingyu on Tech">
+<meta property="og:description" content="A beginner&#39;s guide to accelerated computing with CUDA C&#x2F;C++">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705110605557.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705112232914.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705114918875.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705120358496.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705120802161.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705143206485.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705142714428.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705155324189.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705151808466.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705163448580.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705174250537.png">
+<meta property="article:published_time" content="2024-07-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-12-22T08:35:07.488Z">
+<meta property="article:author" content="Xingyu Yang">
+<meta property="article:tag" content="CUDA">
+<meta property="article:tag" content="HPC">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705110605557.png">
+
+
+<link rel="canonical" href="https://blog.xyang.site/2024/07/05/fundamentals-of-cuda/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://blog.xyang.site/2024/07/05/fundamentals-of-cuda/","path":"2024/07/05/fundamentals-of-cuda/","title":"Fundametals of CUDA C/C++"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Fundametals of CUDA C/C++ | Xingyu on Tech</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Xingyu on Tech</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about-me"><a href="https://xyang.site/" rel="section" target="_blank"><i class="fa fa-user fa-fw"></i>About Me</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Before-You-Start"><span class="nav-number">2.</span> <span class="nav-text">Before You Start</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CUDA-Programming-Basics"><span class="nav-number">3.</span> <span class="nav-text">CUDA Programming Basics</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Our-First-CUDA-Program"><span class="nav-number">3.1.</span> <span class="nav-text">Our First CUDA Program</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CUDA-Thread-Hierarchy"><span class="nav-number">3.2.</span> <span class="nav-text">CUDA Thread Hierarchy</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Kernel-Configuration"><span class="nav-number">3.2.1.</span> <span class="nav-text">Kernel Configuration</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Streaming-Multiprocessors"><span class="nav-number">3.2.2.</span> <span class="nav-text">Streaming Multiprocessors</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CUDA-Streams"><span class="nav-number">3.2.3.</span> <span class="nav-text">CUDA Streams</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CUDA-Memory-Management"><span class="nav-number">4.</span> <span class="nav-text">CUDA Memory Management</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Unified-Memory"><span class="nav-number">4.1.</span> <span class="nav-text">Unified Memory</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Allocation-and-Freeing"><span class="nav-number">4.1.1.</span> <span class="nav-text">Allocation and Freeing</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Reduce-Page-Faults"><span class="nav-number">4.1.2.</span> <span class="nav-text">Reduce Page Faults</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Index-Calculation"><span class="nav-number">4.1.3.</span> <span class="nav-text">Index Calculation</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Manual-Memory-Management-and-Streaming"><span class="nav-number">4.2.</span> <span class="nav-text">Manual Memory Management and Streaming</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Basic-Commands"><span class="nav-number">4.2.1.</span> <span class="nav-text">Basic Commands</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Asynchronous-Memory-Copying"><span class="nav-number">4.2.2.</span> <span class="nav-text">Asynchronous Memory Copying</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Error-Handling"><span class="nav-number">5.</span> <span class="nav-text">Error Handling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Performance-Profiling"><span class="nav-number">6.</span> <span class="nav-text">Performance Profiling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Final-Exercise"><span class="nav-number">7.</span> <span class="nav-text">Final Exercise</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Considerations-to-Guide-Your-Work"><span class="nav-number">7.1.</span> <span class="nav-text">Considerations to Guide Your Work</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Xingyu Yang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://blog.xyang.site/2024/07/05/fundamentals-of-cuda/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Xingyu Yang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xingyu on Tech">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Fundametals of CUDA C/C++ | Xingyu on Tech">
+      <meta itemprop="description" content="A beginner's guide to accelerated computing with CUDA C/C++">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Fundametals of CUDA C/C++
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2024-07-05 00:00:00" itemprop="dateCreated datePublished" datetime="2024-07-05T00:00:00+08:00">2024-07-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-12-22 16:35:07" itemprop="dateModified" datetime="2024-12-22T16:35:07+08:00">2024-12-22</time>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">A beginner's guide to accelerated computing with CUDA C/C++</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p><a target="_blank" rel="noopener" href="https://developer.nvidia.com/about-cuda">CUDA</a> is a parallel computing platform developed by NVIDIA that allows general-purpose computing on GPUs (<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/General-purpose_computing_on_graphics_processing_units">GPGPU</a>). It is widely used in the fields related to high-performance computing, such as machine learning and computer simulation. </p>
+<p>Typically, the parallelism and performance on GPUs are much higher than on CPUs. Let’s look at the <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/FLOPS">FLOPs</a> of some latest CPU and GPU chips. With less than double prize, NVIDIA A100 offers nearly 26 times better performance than today’s most powerful CPU.</p>
+<table>
+<thead>
+<tr>
+<th>Chips</th>
+<th>Performance (TFLOPs)</th>
+<th>Price in 2024</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AMD Ryzen™ Threadripper™ PRO 7995WX</td>
+<td>12.16</td>
+<td>US$ 10,000</td>
+</tr>
+<tr>
+<td>NVIDIA Tesla A100</td>
+<td>312</td>
+<td>US$ 18,000</td>
+</tr>
+</tbody></table>
+<p>In this article, we will discuss the basic methodology on CUDA programming.</p>
+<h2 id="Before-You-Start"><a href="#Before-You-Start" class="headerlink" title="Before You Start"></a>Before You Start</h2><p>NVIDIA offers a command line tool <code>nvidia-smi</code> (system management interface) to show the information of   the GPU installed on the computer. Don’t worry if you do not have a NVIDIA GPU, simply turn to <a target="_blank" rel="noopener" href="https://colab.research.google.com/">Google Colab</a> for a free GPU environment. The rest of the article will be done on Google Colab.</p>
+<p>After we connect to a GPU runtime on Colab, we can now run <code>nvidia-smi</code> in the interactive environment to see the information of the GPU installed. Note that we are in a Python environment and <code>!</code> before system commands tells the environment to run it in a Linux shell.</p>
+<p><img src="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705110605557.png" alt="image-20240705110605557"></p>
+<p>Great! We now have a Tesla T4 GPU! Make sure you have seen similar outputs and we will now move on to our next topic.</p>
+<h2 id="CUDA-Programming-Basics"><a href="#CUDA-Programming-Basics" class="headerlink" title="CUDA Programming Basics"></a>CUDA Programming Basics</h2><p>The prefix of a file in the CUDA language is <code>.cu</code>, and a CUDA file can be compiled along with C&#x2F;C++&#x2F;Fortran easily with the help of <code>CMake</code>. However, it is not today’s topic and we will simply stop here. </p>
+<h3 id="Our-First-CUDA-Program"><a href="#Our-First-CUDA-Program" class="headerlink" title="Our First CUDA Program"></a>Our First CUDA Program</h3><p>Before we talk about CUDA, let’s first look at a C program that we are already familiar with.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">printHelloWorld</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;Hello, world!\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">  printHelloWorld();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Straightforward, right? After rename the file as <code>first.cu</code>, we can compile it with CUDA compiler, just like what we usually do with a C compiler. </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!nvcc first.cu -o first -run</span><br></pre></td></tr></table></figure>
+
+<p><code>nvcc</code> is the CUDA compiler, <code>-o</code> specified the name of the output executable file, <code>-run</code> executes the binary file right after the compilation process finishes. Now we can see the output from the program.</p>
+<p><img src="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705112232914.png" alt="image-20240705112232914"></p>
+<p>The output is expected. However, it is nothing different from what we usually do in C, since what we have written is exactly a C program. Now we will refactor the program so that it runs on GPU. In the context of CUDA programming, CPU is usually called <code>host</code> and GPU <code>device</code>. A function that runs on device is called <strong>kernel function</strong>. The return value of a kernel function <strong>must</strong> be <code>void</code>. To enable some function to run on device, we must add some special qualifier before the function. Here we list common qualifiers and explained their meanings.</p>
+<table>
+<thead>
+<tr>
+<th>Qualifiers</th>
+<th>Meanings</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>__global__</td>
+<td>The function is executed on device, called by host.</td>
+</tr>
+<tr>
+<td>__device__</td>
+<td>The function is executed on device, called by device.</td>
+</tr>
+<tr>
+<td>__host__</td>
+<td>The function is executed on host. This is the default choice when we omit the qualifier.</td>
+</tr>
+</tbody></table>
+<p>In this article, tasks are assigned by the host to the device, so we will only use the <code>__global__</code> qualifier and default qualifier (no qualifier).</p>
+<p>To launch a kernel function (don’t forget what is a kernel), we use triple angle brackets to specify the configuration of the kernel function. Let’s look at an example. The kernel function is defined here,</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">__global__ <span class="type">void</span> <span class="title function_">printHelloWorld</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;Hello, world!\n&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>and called here.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">  printHelloWorld&lt;&lt;&lt;<span class="number">1</span>, <span class="number">2</span>&gt;&gt;&gt;();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>The configuration of the kernel will be explained later. Note that a kernel function is asynchronous, which is to mean that the host won’t wait for the kernel function to finish. Rather, the host will continue to execute the codes below. Function <code>cudaDeviceSynchronize()</code> let host wait for <strong>all</strong> the kernels to finish. Let’s put it together and look at the results. The complete CUDA program should look at this:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">__global__ <span class="type">void</span> <span class="title function_">printHelloWorld</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;Hello, world!\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">  printHelloWorld&lt;&lt;&lt;<span class="number">1</span>, <span class="number">2</span>&gt;&gt;&gt;();</span><br><span class="line">  cudaDeviceSynchronize();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Now we compile and run the program</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!nvcc first.cu -o first -run</span><br></pre></td></tr></table></figure>
+
+<p>And we get the results</p>
+<p><img src="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705114918875.png" alt="image-20240705114918875"></p>
+<p>which shows our program are truly running on GPU!</p>
+<h3 id="CUDA-Thread-Hierarchy"><a href="#CUDA-Thread-Hierarchy" class="headerlink" title="CUDA Thread Hierarchy"></a>CUDA Thread Hierarchy</h3><h4 id="Kernel-Configuration"><a href="#Kernel-Configuration" class="headerlink" title="Kernel Configuration"></a>Kernel Configuration</h4><p>In the past section, we haven’t really talked about what does the parameters in the triple angle brackets actually denote. Let’s look at the CUDA thread hierarchy.</p>
+<p><img src="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705120358496.png" alt="image-20240705120358496"></p>
+<p>CUDA follows a grid-block-thread hierarchy. The overall structure is called <strong>grid</strong>, which is in black and contains blocks. The first parameter denotes <strong>number of blocks</strong> and the second parameter denotes <strong>threads per block</strong>. <strong>Blocks</strong> are painted blue and <strong>threads</strong> white in the slide. So, kernel function <code>performWork&lt;&lt;&lt;2, 4&gt;&gt;&gt;</code> actually says, the host assigns work to 2 blocks, with 4 threads each. Now you can explain why we have seen two echoes in our first CUDA program.</p>
+<p>A thread can get its <strong>block index</strong> and <strong>thread index within the block</strong> by variables <code>blockIdx.x</code> and <code>threadIdx.x</code>, which are available directly in the definition of a kernel function.</p>
+<p>Let’s look at an example,</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">__global__ <span class="type">void</span> <span class="title function_">threadInBlock</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;Thread %d from block %d\n&quot;</span>, threadIdx.x, blockIdx.x);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">  threadInBlock&lt;&lt;&lt;<span class="number">2</span>, <span class="number">4</span>&gt;&gt;&gt;();</span><br><span class="line">  cudaDeviceSynchronize();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>which gives the output:</p>
+<p><img src="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705120802161.png" alt="image-20240705120802161"></p>
+<p>There are two more variables <code>gridDim.x</code> and <code>blockDim.x</code>, meaning the number of blocks in a grid and the number of threads in a block respectively and <strong>corresponding</strong> to the two parameters we passed when launched the kernel function.</p>
+<p>You might wonder why there is a <code>.x</code> after each variable. The truth is that both the blocks and threads can be place in 3 dimensions. With the help of class <code>dim3</code>, we can pass a multi-dimensional configuration into a kernel. This trick is only for convenience in some particular applications, for example matrix operations, and would do nothing to the performance.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">performWork&lt;&lt;&lt;dim3(<span class="number">2</span>,<span class="number">2</span>,<span class="number">1</span>), dim3(<span class="number">2</span>,<span class="number">2</span>,<span class="number">1</span>)&gt;&gt;&gt;();</span><br></pre></td></tr></table></figure>
+
+<p>The hierarchy of the configuration above will look like this:</p>
+<p><img src="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705143206485.png" alt="image-20240705143206485"></p>
+<p>Now we can access these values with <code>gridDim.x</code>, <code>gridDim.y</code>, <code>gridDim.z</code>, <code>blockDim.x</code>, <code>blockDim.y</code>, <code>blockDim.z()</code>, <code>blockIdx.x</code>, <code>blockIdx.y</code>, <code>blockIdx.z</code>, <code>threadIdx.x</code>, <code>threadIdx.y</code>, <code>threadIdx.z</code>.</p>
+<p>These values are important for many calculations, as we will discuss later with memory. </p>
+<h4 id="Streaming-Multiprocessors"><a href="#Streaming-Multiprocessors" class="headerlink" title="Streaming Multiprocessors"></a>Streaming Multiprocessors</h4><p>In this section, we explain <strong>streaming multiprocessors</strong> (SMs) and offer a simple rule for picking proper numbers for <code>numberOfBlocks</code> and <code>threadsPerBlock</code>. </p>
+<p><img src="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705142714428.png" alt="image-20240705142714428"></p>
+<p>SMs are basic units that execute tasks. As shown in the figure above, blocks are scheduled to run on SMs. When the number of blocks is multiple of the number of SMs, the execution will be efficient. Therefore, we cannot hardcode <code>numberOfBlocks</code> and may  use an API to get a value for a particular machine instead. Usually, taking <code>numberOfBlocks</code> as <code>numberOfSMs</code> times $16$, $32$, or $64$ would be a good choice.</p>
+<p>As for <code>threadsPerBlock</code>, it can be any integer between $1$ and $1024$. $512$ usually becomes a good choice. </p>
+<p>Here is an example that we call a CUDA API to get the number of SMs. The official reference for struct <code>cudaDeviceProp</code> is <a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaDeviceProp.html">here</a>.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> deviceId;</span><br><span class="line">cudaGetDevice(&amp;deviceId);</span><br><span class="line"></span><br><span class="line">cudaDeviceProp prop;</span><br><span class="line">cudaGetDeviceProperties(&amp;prop, deviceId);</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> numberOfSMs = prop.multiProcessorCount;</span><br></pre></td></tr></table></figure>
+
+<p>Then, we can create a kernel configuration like this</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> numberOfBlocks = numberOfSMs * <span class="number">32</span>;</span><br><span class="line"><span class="type">int</span> threadsPerBlock = <span class="number">512</span>;</span><br><span class="line">some_kernel&lt;&lt;&lt;numberOfBlocks, threadsPerBlock&gt;&gt;&gt;();</span><br></pre></td></tr></table></figure>
+
+<h4 id="CUDA-Streams"><a href="#CUDA-Streams" class="headerlink" title="CUDA Streams"></a>CUDA Streams</h4><p><img src="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705155324189.png" alt="image-20240705155324189"></p>
+<p>GPU tasks are scheduled in <strong>streams</strong> and the kernels in one stream is <strong>serial</strong>. Before, we didn’t specify the stream and the kernels are executed in the <strong>default stream</strong>. Default streaming is <strong>blocking</strong>. That is to mean, when there is a task scheduled in the default stream, all the tasks on the <strong>non-default streams</strong> will be blocked, while all the other non-default streams are <strong>non-blocking</strong>, allowing concurrent kernel execution. CUDA offers a stream class <code>cudaStream_t</code> and they are created with <code>cudaStreamCreate()</code> and destroyed with <code>cudaStreamDestroy()</code>. As we didn’t mention before, a kernel configuration actually accepts 4 parameters, <code>numberOfBlocks</code>, <code>threadsPerBlock</code>, <code>sharedMemoryBytes</code>, and <code>stream</code>. We just left the latter 2 parameter in defaults before. Here is an example with concurrent streams.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cudaStream_t stream1;</span><br><span class="line">cudaStream_t stream2;</span><br><span class="line">cudaStreamCreate(&amp;stream1);</span><br><span class="line">cudaStreamCreate(&amp;stream2);</span><br><span class="line"></span><br><span class="line">some_kernel&lt;&lt;&lt;numberOfBlocks, threadsPerblock, <span class="number">0</span>, stream1&gt;&gt;&gt;();</span><br><span class="line">some_kernel&lt;&lt;&lt;numberOfBlocks, threadsPerblock, <span class="number">0</span>, stream2&gt;&gt;&gt;();</span><br><span class="line"></span><br><span class="line">cudaStreamDestroy(stream1);</span><br><span class="line">cudaStreamDestroy(stream2);</span><br></pre></td></tr></table></figure>
+
+<p>In this part of program, the kernels in <code>stream1</code> and <code>stream2</code> will be concurrent. Since we don’t need shared memory here, we just left them in 0. Note that although <code>cudaStreamDestroy()</code> returns immediately after calling, the streams are not actually destroyed until the kernels in the stream finish, so we don’t need to worry about the side effect of destroying a stream.</p>
+<h2 id="CUDA-Memory-Management"><a href="#CUDA-Memory-Management" class="headerlink" title="CUDA Memory Management"></a>CUDA Memory Management</h2><p>So far, we have discussed how to launch a kernel running on device. However, such kernels could only access memory automatically allocated. That is, local variables in kernel function definition. We wish to allocate memory that can be accessed by both the host and the device. CUDA offers a unified memory model so that we don’t need to worry about memory access.</p>
+<h3 id="Unified-Memory"><a href="#Unified-Memory" class="headerlink" title="Unified Memory"></a>Unified Memory</h3><h4 id="Allocation-and-Freeing"><a href="#Allocation-and-Freeing" class="headerlink" title="Allocation and Freeing"></a>Allocation and Freeing</h4><p>To allocate unified memory that can be accessed both on the device and the host, we call <code>cudaMallocManaged()</code> function.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> N = <span class="number">2</span>&lt;&lt;<span class="number">20</span>;</span><br><span class="line"><span class="type">int</span>* <span class="built_in">array</span>;</span><br><span class="line"><span class="type">int</span> size = N * <span class="keyword">sizeof</span>(<span class="type">int</span>);</span><br><span class="line">cudaMallocManaged(&amp;<span class="built_in">array</span>, size);</span><br></pre></td></tr></table></figure>
+
+<p>Thus, the integer array can be accessed both on the device and the host. To free allocated unified memory, we call <code>cudaFree()</code> utility.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cudaFree(<span class="built_in">array</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Reduce-Page-Faults"><a href="#Reduce-Page-Faults" class="headerlink" title="Reduce Page Faults"></a>Reduce Page Faults</h4><p><img src="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705151808466.png" alt="image-20240705151808466"></p>
+<p>When UM was initially allocated, it may not be resident on CPU or GPU. If the memory was first initialized by CPU then GPU, a <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Page_fault">page fault</a> occurs. Memory will be transferred from host to device and slow down the tasks. Similarly, if UM was initialized on GPU and then accessed by CPU, a page fault occurs and memory transfer begins. The place memory is resident on depends on the last access. When a page fault is present, memory is transferred is small batch size. If we can predict a page fault, we can transfer  the corresponding memory in advance with bigger batch size to increase the efficiency. CUDA offers an API called <code>cudaPrefetch</code> to perform such behaviors. Here is an example.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> deviceId;</span><br><span class="line">cudaGetDevice(&amp;deviceId);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Allocate unified memory</span></span><br><span class="line"><span class="type">int</span> numberOfSMs = prop.multiProcessorCount;</span><br><span class="line"><span class="type">int</span> N = <span class="number">2</span>&lt;&lt;<span class="number">20</span>;</span><br><span class="line"><span class="type">int</span>* <span class="built_in">array</span>;</span><br><span class="line"><span class="type">int</span> size = N * <span class="keyword">sizeof</span>(<span class="type">int</span>);</span><br><span class="line">cudaMallocManaged(&amp;<span class="built_in">array</span>, size);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Initialize the UM on CPU, then access it on GPU</span></span><br><span class="line">init_on_cpu(<span class="built_in">array</span>, size);</span><br><span class="line">cudaPrefetchAsync(<span class="built_in">array</span>, size, deviceId); <span class="comment">// Trasfer the memory from host to device</span></span><br><span class="line">access_memory&lt;&lt;&lt;numberOfBlocks, threadsPerBlock&gt;&gt;&gt;();</span><br><span class="line">cudaDeviceSynchronize();</span><br><span class="line"></span><br><span class="line"><span class="comment">// Free memory</span></span><br><span class="line">cudaFree(<span class="built_in">array</span>);</span><br></pre></td></tr></table></figure>
+
+<p>The third parameter of <code>cudaPrefetchAsync</code> specifies the direction of memory transfer. When filled with <code>deviceId</code>, the memory is transferred from host to device (HtoD), while <code>cudaCpuDeviceId</code> specifies a transfer from device to host (DtoH). Note that the variable <code>cudaCpuDeviceId</code> can directly be accessed globally and we need no APIs to get this variable.</p>
+<h4 id="Index-Calculation"><a href="#Index-Calculation" class="headerlink" title="Index Calculation"></a>Index Calculation</h4><p>With unified memory, we can finally schedule some tasks on GPU. Let’s look at an example. Suppose we have two vectors containing integers, each with length 2^22, and we want to accelerate vector addition with CUDA. Our number of threads might no be bigger enough to establish a bijection between thread indices and vector indices, so a thread must execute more than one addition. The convention is to define a variable <code>stride</code> that equals to the total number of threads in a (also the only) grid, and increase the loop index by <code>stride</code> each time. We assume the kernel configuration is 1-d and here is how we calculate index. Note that we are checking index boundary each time to avoid unexpected memory access.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">__global__ <span class="type">void</span> <span class="title function_">vectorAdd</span><span class="params">(<span class="type">int</span>* a, <span class="type">int</span>* b, <span class="type">int</span>* res, <span class="type">int</span> N)</span> &#123;</span><br><span class="line">  <span class="type">int</span> idx = blockDim.x * blockIdx.x + threadIdx.x;</span><br><span class="line">  <span class="type">int</span> stride = gridDim.x * blockDim.x;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = idx; i &lt; N; i += stride) &#123;</span><br><span class="line">    res[i] = a[i] + b[i];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Manual-Memory-Management-and-Streaming"><a href="#Manual-Memory-Management-and-Streaming" class="headerlink" title="Manual Memory Management and Streaming"></a>Manual Memory Management and Streaming</h3><h4 id="Basic-Commands"><a href="#Basic-Commands" class="headerlink" title="Basic Commands"></a>Basic Commands</h4><p>Although UM is powerful enough, we may still want to manage the memory ourselves to further optimize the efficiency. Here are some commands for manually managing the memory.</p>
+<ul>
+<li><p><code>cudaMalloc</code> will allocate the memory on GPU. The memory is <strong>not</strong> accessible on CPU. </p>
+</li>
+<li><p><code>cudaFree</code> frees the memory allocated on device.</p>
+</li>
+<li><p><code>cudaMallocHost</code> will allocate the memory on CPU just like what a normal <code>malloc</code> does. The memory will be page locked on host. Too many page locked memory would reduce CPU performance.</p>
+</li>
+<li><p><code>cudaFreeHost</code> frees the memory allocated on host.</p>
+</li>
+<li><p><code>cudaMemcpy</code> <strong>copies</strong> the memory DtoH or HtoD, instead of <strong>transferring</strong>.</p>
+</li>
+<li><p><code>cudaMemcpyAsync</code> allows <strong>asynchronously</strong> memory copying (explained later).</p>
+</li>
+</ul>
+<p>Let’s look at an example.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> N = <span class="number">2</span>&lt;&lt;<span class="number">20</span>;</span><br><span class="line"><span class="type">int</span> size = N * <span class="keyword">sizeof</span>(<span class="type">int</span>);</span><br><span class="line"><span class="type">int</span>* array_device;</span><br><span class="line"><span class="type">int</span>* array_host;</span><br><span class="line">cudaMalloc(&amp;array_device, size);</span><br><span class="line">cudaMallocHost(&amp;array_host, size);</span><br><span class="line"></span><br><span class="line">init_on_cpu(array_host, N);</span><br><span class="line">cudaMemcpy(array_device, array_host, size, cudaMemcpyHostToDevice);</span><br><span class="line">some_kernel&lt;&lt;&lt;blocks, threads, <span class="number">0</span>, stream&gt;&gt;&gt;();</span><br><span class="line">cudaMemcpy(array_host, array_device, size, cudaMemcpyDeviceToHost);</span><br><span class="line"></span><br><span class="line">cudaFree(array_device);</span><br><span class="line">cudaFreeHost(array_host);</span><br></pre></td></tr></table></figure>
+
+<p>Note that <code>cudaMemcpy</code> first accepts the destination pointer then source pointer, unlike Linux <code>cp</code> first-source-then-destination convention. <code>cudaMemcpyDeviceToHost</code> and <code>cudaMemcpyHostToDevice</code> are two variables that can be directly and globally accessed that specify the direction of memory copying. </p>
+<h4 id="Asynchronous-Memory-Copying"><a href="#Asynchronous-Memory-Copying" class="headerlink" title="Asynchronous Memory Copying"></a>Asynchronous Memory Copying</h4><p>In the last example, memory copy starts after kernel finishes. To optimize the process, we can start asynchronous (or concurrent) memory copying right after a part of kernel finishes.</p>
+<p><img src="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705163448580.png" alt="image-20240705163448580"></p>
+<p>An simple approach is to divide the kernel in several segments. A segment of memory copying starts right after a segment of kernel finishes. We will refactor the former vector addition program and take it as an example.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Perform vector addition in segments</span></span><br><span class="line"><span class="type">int</span> numberOfSegments = <span class="number">4</span>;</span><br><span class="line"><span class="type">int</span> segmentN = N / numberOfSegments;</span><br><span class="line"><span class="type">int</span> segmentSize = size / numberOfSegments;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numberOfSegments; i++) &#123;</span><br><span class="line">  cudaStream_t stream;</span><br><span class="line">  cudaStreamCreate(&amp;stream);</span><br><span class="line">  <span class="type">int</span> offset = i * segmentN;</span><br><span class="line">  vectorAdd&lt;&lt;&lt;blocks, threads, <span class="number">0</span>, stream1&gt;&gt;&gt;(a_device + offset, b_device + offset, </span><br><span class="line">                                             c_device + offset, segmentN);</span><br><span class="line">  cudaMemcpyAsync(c_host + offset, c_device + offset, segmentSize, cudaMemcpyDeviceToHost, stream);</span><br><span class="line">  cudaStreamDestroy(stream);</span><br><span class="line">&#125;</span><br><span class="line">cudaDeviceSynchronize();</span><br></pre></td></tr></table></figure>
+
+<p>The piece of program above divides the kernel <code>vectorAdd</code> in 4 segments. After one segment of kernel finishes, asynchronous memory copying starts. Every stream first executes the kernel then copying the corresponding memory to the host. Note that we must <strong>carefully</strong> handle all the indices here to avoid illegal memory access. After all of theses are done, the stream is destroyed (recall stream destruction behavior). The whole accelerated program is pasted below for your reference. Don’t forget to destroy unused streams and free unused memories.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">__global__ <span class="type">void</span> <span class="title function_">init_on_gpu</span><span class="params">(<span class="type">int</span>* a, <span class="type">int</span> init_val, <span class="type">int</span> N)</span> &#123;</span><br><span class="line">  <span class="type">int</span> idx = blockDim.x * blockIdx.x + threadIdx.x;</span><br><span class="line">  <span class="type">int</span> stride = gridDim.x * blockDim.x;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = idx; i &lt; N; i += stride) &#123;</span><br><span class="line">    a[i] = init_val;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">__global__ <span class="type">void</span> <span class="title function_">vectorAdd</span><span class="params">(<span class="type">int</span>* a, <span class="type">int</span>* b, <span class="type">int</span>* res, <span class="type">int</span> N)</span> &#123;</span><br><span class="line">  <span class="type">int</span> idx = blockDim.x * blockIdx.x + threadIdx.x;</span><br><span class="line">  <span class="type">int</span> stride = gridDim.x * blockDim.x;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = idx; i &lt; N; i += stride) &#123;</span><br><span class="line">    res[i] = a[i] + b[i];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">verify_on_cpu</span><span class="params">(<span class="type">int</span>* a, <span class="type">int</span> res, <span class="type">int</span> N)</span> &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; N; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (a[i] != res) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="comment">// Variable declarations</span></span><br><span class="line">  <span class="type">int</span> N = <span class="number">2</span>&lt;&lt;<span class="number">20</span>;</span><br><span class="line">  <span class="type">int</span> size = N * <span class="keyword">sizeof</span>(<span class="type">int</span>);</span><br><span class="line">  <span class="type">int</span>* a_device;</span><br><span class="line">  <span class="type">int</span>* b_device;</span><br><span class="line">  <span class="type">int</span>* c_device;</span><br><span class="line">  <span class="type">int</span>* c_host;</span><br><span class="line">  cudaMalloc(&amp;a_device, size);</span><br><span class="line">  cudaMalloc(&amp;b_device, size);</span><br><span class="line">  cudaMalloc(&amp;c_device, size);</span><br><span class="line">  cudaMallocHost(&amp;c_host, size);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// Kernel configuration</span></span><br><span class="line">  <span class="type">int</span> deviceId;</span><br><span class="line">  cudaGetDevice(&amp;deviceId);</span><br><span class="line">  cudaDeviceProp prop;</span><br><span class="line">  cudaGetDeviceProperties(&amp;prop, deviceId);</span><br><span class="line">  <span class="type">int</span> SMs = prop.multiProcessorCount;</span><br><span class="line">  <span class="type">int</span> blocks = SMs * <span class="number">32</span>;</span><br><span class="line">  <span class="type">int</span> threads = <span class="number">512</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// Stream creation</span></span><br><span class="line">  cudaStream_t stream1;</span><br><span class="line">  cudaStream_t stream2;</span><br><span class="line">  cudaStream_t stream3;</span><br><span class="line">  cudaStreamCreate(&amp;stream1);</span><br><span class="line">  cudaStreamCreate(&amp;stream2);</span><br><span class="line">  cudaStreamCreate(&amp;stream3);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Initialize arrays on device</span></span><br><span class="line">  init_on_gpu&lt;&lt;&lt;blocks, threads, <span class="number">0</span>, stream1&gt;&gt;&gt;(a_device, <span class="number">2</span>, N);</span><br><span class="line">  init_on_gpu&lt;&lt;&lt;blocks, threads, <span class="number">0</span>, stream2&gt;&gt;&gt;(b_device, <span class="number">3</span>, N);</span><br><span class="line">  init_on_gpu&lt;&lt;&lt;blocks, threads, <span class="number">0</span>, stream3&gt;&gt;&gt;(c_device, <span class="number">0</span>, N);</span><br><span class="line">  cudaDeviceSynchronize();</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// Perform vector addition in segments</span></span><br><span class="line">  <span class="type">int</span> numberOfSegments = <span class="number">4</span>;</span><br><span class="line">  <span class="type">int</span> segmentN = N / numberOfSegments;</span><br><span class="line">  <span class="type">int</span> segmentSize = size / numberOfSegments;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numberOfSegments; i++) &#123;</span><br><span class="line">    cudaStream_t stream;</span><br><span class="line">    cudaStreamCreate(&amp;stream);</span><br><span class="line">    <span class="type">int</span> offset = i * segmentN;</span><br><span class="line">    vectorAdd&lt;&lt;&lt;blocks, threads, <span class="number">0</span>, stream1&gt;&gt;&gt;(a_device + offset, b_device + offset, c_device + offset, segmentN);</span><br><span class="line">    cudaMemcpyAsync(c_host + offset, c_device + offset, segmentSize, cudaMemcpyDeviceToHost, stream);</span><br><span class="line">    cudaStreamDestroy(stream);</span><br><span class="line">  &#125;</span><br><span class="line">  cudaDeviceSynchronize();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Verify results</span></span><br><span class="line">  <span class="keyword">if</span> (verify_on_cpu(c_host, <span class="number">5</span>, N)) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Results are correct!\n&quot;</span>);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Results are incorrect!\n&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Free memories</span></span><br><span class="line">  cudaFree(a_device);</span><br><span class="line">  cudaFree(b_device);</span><br><span class="line">  cudaFree(c_device);</span><br><span class="line">  cudaFreeHost(c_host);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Error-Handling"><a href="#Error-Handling" class="headerlink" title="Error Handling"></a>Error Handling</h2><p>CUDA usually does not report runtime errors, so we must detect and record them manually. CUDA offers a class <code>cudaError_t</code> to handle errors. The return values of CUDA APIs are <code>cudaError_t</code>, allowing us to catch error directly.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="type">int</span>* <span class="built_in">array</span>;</span><br><span class="line">  <span class="type">int</span> size = <span class="number">-1</span>;</span><br><span class="line">  cudaError_t err;</span><br><span class="line">  err = cudaMallocManaged(&amp;<span class="built_in">array</span>, size);</span><br><span class="line">  <span class="keyword">if</span> (err != cudaSuccess) &#123;</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Error: %s\n&quot;</span>, cudaGetErrorString(err));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>This program will throw an error because $-1$ is not a valid size.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error: out of memory</span><br></pre></td></tr></table></figure>
+
+<p>However, the return values of custom kernels are <code>void</code>, meaning we cannot catch error in the same way when launching those kernels. CUDA offers <code>cudaGetLastError</code> to catch the last error thrown. Also, we can create a utility function to encapsulate such processes.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="type">void</span> <span class="title function_">checkCudaError</span><span class="params">()</span> &#123;</span><br><span class="line">  cudaError_t err;</span><br><span class="line">  err = cudaGetLastError();</span><br><span class="line">  <span class="keyword">if</span> (err != cudaSuccess) &#123;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Error: %s\n&quot;</span>, cudaGetErrorString(err));</span><br><span class="line">    assert(err == cudaSuccess);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Therefore, we can check the errors when launching kernels.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">some_kernel&lt;&lt;&lt;<span class="number">-1</span>, <span class="number">-1</span>&gt;&gt;&gt;();</span><br><span class="line">checkCudaError();</span><br></pre></td></tr></table></figure>
+
+<p>which yields</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error: invalid configuration argument</span><br></pre></td></tr></table></figure>
+
+<p>Such error handling may help debug the CUDA program.</p>
+<h2 id="Performance-Profiling"><a href="#Performance-Profiling" class="headerlink" title="Performance Profiling"></a>Performance Profiling</h2><p>NVIDIA Nsight Systems command line tool (nsys) is a command line profiler that will gather following information:</p>
+<ul>
+<li>Profile configuration details</li>
+<li>Report file(s) generation details</li>
+<li><strong>CUDA API Statistics</strong></li>
+<li><strong>CUDA Kernel Statistics</strong></li>
+<li><strong>CUDA Memory Operation Statistics (time and size)</strong></li>
+<li>OS Runtime API Statistics</li>
+</ul>
+<p>To install <code>nsys</code> in Colab, run the following commands:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">!wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/nsight-systems-<span class="number">2023.2</span><span class="number">.3_2023</span><span class="number">.2</span><span class="number">.3</span><span class="number">.1001</span>-1_amd64.deb</span><br><span class="line">!apt update</span><br><span class="line">!apt install ./nsight-systems-<span class="number">2023.2</span><span class="number">.3_2023</span><span class="number">.2</span><span class="number">.3</span><span class="number">.1001</span>-1_amd64.deb</span><br><span class="line">!apt --fix-broken install</span><br></pre></td></tr></table></figure>
+
+<p>Then, we can profile the running information of our CUDA program. Here we take vector addition as an example. <code>profile</code> means  we want to profile the executable and <code>--stats=true</code> tells <code>nsys</code> to print all the information.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!nsys profile --stats=true vector-add</span><br></pre></td></tr></table></figure>
+
+<p>A part of printed information is pasted below:</p>
+<p><img src="https://raw.githubusercontent.com/xing-yu-yang/cloud-image/main/assets/image-20240705174250537.png" alt="image-20240705174250537"></p>
+<p>Here we can trace the running time of kernels and the memory behavior. You can compare the results of different <code>numberOfBlocks</code> and see what kind of <code>memcpy</code> page faults will bring about.</p>
+<h2 id="Final-Exercise"><a href="#Final-Exercise" class="headerlink" title="Final Exercise"></a>Final Exercise</h2><p> An <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/N-body_problem">n-body</a> simulator predicts the individual motions of a group of objects interacting with each other gravitationally. Below is a simple, though working, n-body simulator for bodies moving through 3 dimensional space.</p>
+<p>In its current CPU-only form, this application takes about 5 seconds to run on 4096 particles, and <strong>20 minutes</strong> to run on 65536 particles. Your task is to GPU accelerate the program, retaining the correctness of the simulation.</p>
+<h3 id="Considerations-to-Guide-Your-Work"><a href="#Considerations-to-Guide-Your-Work" class="headerlink" title="Considerations to Guide Your Work"></a>Considerations to Guide Your Work</h3><p>Here are some things to consider before beginning your work:</p>
+<ul>
+<li>Especially for your first refactors, the logic of the application, the <code>bodyForce</code> function in particular, can and should remain largely unchanged: focus on accelerating it as easily as possible.</li>
+<li>The code base contains a for-loop inside <code>main</code> for integrating the interbody forces calculated by <code>bodyForce</code> into the positions of the bodies in the system. This integration both needs to occur after <code>bodyForce</code> runs, and, needs to complete before the next call to <code>bodyForce</code>. Keep this in mind when choosing how and where to parallelize.</li>
+<li>Use a <strong>profile driven</strong> and iterative approach.</li>
+<li>You are not required to add error handling to your code, but you might find it helpful, as you are responsible for your code working correctly.</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;math.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;timer.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;files.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SOFTENING 1e-9f</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Each body contains x, y, and z coordinate positions,</span></span><br><span class="line"><span class="comment"> * as well as velocities in the x, y, and z directions.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span> <span class="type">float</span> x, y, z, vx, vy, vz; &#125; Body;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Calculate the gravitational impact of all bodies in the system</span></span><br><span class="line"><span class="comment"> * on all others.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">bodyForce</span><span class="params">(Body *p, <span class="type">float</span> dt, <span class="type">int</span> n)</span> &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; ++i) &#123;</span><br><span class="line">    <span class="type">float</span> Fx = <span class="number">0.0f</span>; <span class="type">float</span> Fy = <span class="number">0.0f</span>; <span class="type">float</span> Fz = <span class="number">0.0f</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; n; j++) &#123;</span><br><span class="line">      <span class="type">float</span> dx = p[j].x - p[i].x;</span><br><span class="line">      <span class="type">float</span> dy = p[j].y - p[i].y;</span><br><span class="line">      <span class="type">float</span> dz = p[j].z - p[i].z;</span><br><span class="line">      <span class="type">float</span> distSqr = dx*dx + dy*dy + dz*dz + SOFTENING;</span><br><span class="line">      <span class="type">float</span> invDist = rsqrtf(distSqr);</span><br><span class="line">      <span class="type">float</span> invDist3 = invDist * invDist * invDist;</span><br><span class="line"></span><br><span class="line">      Fx += dx * invDist3; Fy += dy * invDist3; Fz += dz * invDist3;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    p[i].vx += dt*Fx; p[i].vy += dt*Fy; p[i].vz += dt*Fz;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">const</span> <span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span>** argv)</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// The assessment will test against both 2&lt;11 and 2&lt;15.</span></span><br><span class="line">  <span class="comment">// Feel free to pass the command line argument 15 when you generate ./nbody report files</span></span><br><span class="line">  <span class="type">int</span> nBodies = <span class="number">2</span>&lt;&lt;<span class="number">11</span>;</span><br><span class="line">  <span class="keyword">if</span> (argc &gt; <span class="number">1</span>) nBodies = <span class="number">2</span>&lt;&lt;atoi(argv[<span class="number">1</span>]);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// The assessment will pass hidden initialized values to check for correctness.</span></span><br><span class="line">  <span class="comment">// You should not make changes to these files, or else the assessment will not work.</span></span><br><span class="line">  <span class="type">const</span> <span class="type">char</span> * initialized_values;</span><br><span class="line">  <span class="type">const</span> <span class="type">char</span> * solution_values;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (nBodies == <span class="number">2</span>&lt;&lt;<span class="number">11</span>) &#123;</span><br><span class="line">    initialized_values = <span class="string">&quot;files/initialized_4096&quot;</span>;</span><br><span class="line">    solution_values = <span class="string">&quot;files/solution_4096&quot;</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123; <span class="comment">// nBodies == 2&lt;&lt;15</span></span><br><span class="line">    initialized_values = <span class="string">&quot;files/initialized_65536&quot;</span>;</span><br><span class="line">    solution_values = <span class="string">&quot;files/solution_65536&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (argc &gt; <span class="number">2</span>) initialized_values = argv[<span class="number">2</span>];</span><br><span class="line">  <span class="keyword">if</span> (argc &gt; <span class="number">3</span>) solution_values = argv[<span class="number">3</span>];</span><br><span class="line"></span><br><span class="line">  <span class="type">const</span> <span class="type">float</span> dt = <span class="number">0.01f</span>; <span class="comment">// Time step</span></span><br><span class="line">  <span class="type">const</span> <span class="type">int</span> nIters = <span class="number">10</span>;  <span class="comment">// Simulation iterations</span></span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> bytes = nBodies * <span class="keyword">sizeof</span>(Body);</span><br><span class="line">  <span class="type">float</span> *buf;</span><br><span class="line"></span><br><span class="line">  buf = (<span class="type">float</span> *)<span class="built_in">malloc</span>(bytes);</span><br><span class="line"></span><br><span class="line">  Body *p = (Body*)buf;</span><br><span class="line"></span><br><span class="line">  read_values_from_file(initialized_values, buf, bytes);</span><br><span class="line"></span><br><span class="line">  <span class="type">double</span> totalTime = <span class="number">0.0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/*</span></span><br><span class="line"><span class="comment">   * This simulation will run for 10 cycles of time, calculating gravitational</span></span><br><span class="line"><span class="comment">   * interaction amongst bodies, and adjusting their positions to reflect.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> iter = <span class="number">0</span>; iter &lt; nIters; iter++) &#123;</span><br><span class="line">    StartTimer();</span><br><span class="line"></span><br><span class="line">  <span class="comment">/*</span></span><br><span class="line"><span class="comment">   * You will likely wish to refactor the work being done in `bodyForce`,</span></span><br><span class="line"><span class="comment">   * and potentially the work to integrate the positions.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line"></span><br><span class="line">    bodyForce(p, dt, nBodies); <span class="comment">// compute interbody forces</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/*</span></span><br><span class="line"><span class="comment">   * This position integration cannot occur until this round of `bodyForce` has completed.</span></span><br><span class="line"><span class="comment">   * Also, the next round of `bodyForce` cannot begin until the integration is complete.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span> ; i &lt; nBodies; i++) &#123; <span class="comment">// integrate position</span></span><br><span class="line">      p[i].x += p[i].vx*dt;</span><br><span class="line">      p[i].y += p[i].vy*dt;</span><br><span class="line">      p[i].z += p[i].vz*dt;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">const</span> <span class="type">double</span> tElapsed = GetTimer() / <span class="number">1000.0</span>;</span><br><span class="line">    totalTime += tElapsed;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">double</span> avgTime = totalTime / (<span class="type">double</span>)(nIters);</span><br><span class="line">  <span class="type">float</span> billionsOfOpsPerSecond = <span class="number">1e-9</span> * nBodies * nBodies / avgTime;</span><br><span class="line">  write_values_to_file(solution_values, buf, bytes);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// You will likely enjoy watching this value grow as you accelerate the application,</span></span><br><span class="line">  <span class="comment">// but beware that a failure to correctly synchronize the device might result in</span></span><br><span class="line">  <span class="comment">// unrealistically high values.</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;%0.3f Billion Interactions / second&quot;</span>, billionsOfOpsPerSecond);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">free</span>(buf);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CUDA/" rel="tag"># CUDA</a>
+              <a href="/tags/HPC/" rel="tag"># HPC</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/12/22/implement-a-for-constexpr-in-cxx/" rel="next" title="Implement a For Constexpr in C++">
+                  Implement a For Constexpr in C++ <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class=""></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Xingyu Yang</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
