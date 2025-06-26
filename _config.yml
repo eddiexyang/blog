@@ -102,6 +102,20 @@ ignore:
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
 theme: next
+theme_config:
+  scheme: Gemini
+  menu:
+    home: / || fa fa-home
+    about: /about/ || fa fa-user
+    tags: /tags/ || fa fa-tags
+    archives: /archives/ || fa fa-archive
+  footer:
+    icon:
+      name:
+    since: 2024
+  motion:
+    enable: false
+
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
