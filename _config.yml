@@ -115,6 +115,17 @@ theme_config:
     since: 2024
   motion:
     enable: false
+  algolia_search:
+    enable: true
+    hits:
+      per_page: 10
+  social:
+    GitHub: https://github.com/eddiexyang || fab fa-github
+    E-Mail: mailto:xyang@acm.org || fa fa-envelope
+  social_icons:
+    enable: true
+    icons_only: true
+    transition: false
 
 
 # Deployment
