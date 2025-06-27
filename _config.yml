@@ -98,6 +98,12 @@ include:
 exclude:
 ignore:
 
+search:
+  path: search.xml
+  field: post
+  content: true
+  format: html
+
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
@@ -115,10 +121,14 @@ theme_config:
     since: 2024
   motion:
     enable: false
-  algolia_search:
+  local_search:
     enable: true
-    hits:
-      per_page: 10
+    # Show top n results per article, show all results by setting to -1
+    top_n_per_article: 1
+    # Unescape html strings to the readable one.
+    unescape: false
+    # Preload the search data when the page loads.
+    preload: false
   social:
     GitHub: https://github.com/eddiexyang || fab fa-github
     E-Mail: mailto:xyang@acm.org || fa fa-envelope
