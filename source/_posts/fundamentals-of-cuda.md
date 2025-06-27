@@ -26,7 +26,7 @@ NVIDIA offers a command line tool `nvidia-smi` (system management interface) to 
 
 After we connect to a GPU runtime on Colab, we can now run `nvidia-smi` in the interactive environment to see the information of the GPU installed. Note that we are in a Python environment and `!` before system commands tells the environment to run it in a Linux shell.
 
-![image-20240705110605557](image-20240705110605557.png)
+![fundamentals-of-cuda/image-20240705110605557](fundamentals-of-cuda/image-20240705110605557.png)
 
 Great! We now have a Tesla T4 GPU! Make sure you have seen similar outputs and we will now move on to our next topic.
 
@@ -58,7 +58,7 @@ Straightforward, right? After rename the file as `first.cu`, we can compile it w
 
 `nvcc` is the CUDA compiler, `-o` specified the name of the output executable file, `-run` executes the binary file right after the compilation process finishes. Now we can see the output from the program.
 
-![image-20240705112232914](image-20240705112232914.png)
+![fundamentals-of-cuda/image-20240705112232914](fundamentals-of-cuda/image-20240705112232914.png)
 
 The output is expected. However, it is nothing different from what we usually do in C, since what we have written is exactly a C program. Now we will refactor the program so that it runs on GPU. In the context of CUDA programming, CPU is usually called `host` and GPU `device`. A function that runs on device is called **kernel function**. The return value of a kernel function **must** be `void`. To enable some function to run on device, we must add some special qualifier before the function. Here we list common qualifiers and explained their meanings.
 
@@ -109,7 +109,7 @@ Now we compile and run the program
 
 And we get the results
 
-![image-20240705114918875](image-20240705114918875.png)
+![fundamentals-of-cuda/image-20240705114918875](fundamentals-of-cuda/image-20240705114918875.png)
 
 which shows our program are truly running on GPU!
 
@@ -119,7 +119,7 @@ which shows our program are truly running on GPU!
 
 In the past section, we haven't really talked about what does the parameters in the triple angle brackets actually denote. Let's look at the CUDA thread hierarchy.
 
-![image-20240705120358496](image-20240705120358496.png)
+![fundamentals-of-cuda/image-20240705120358496](fundamentals-of-cuda/image-20240705120358496.png)
 
 CUDA follows a grid-block-thread hierarchy. The overall structure is called **grid**, which is in black and contains blocks. The first parameter denotes **number of blocks** and the second parameter denotes **threads per block**. **Blocks** are painted blue and **threads** white in the slide. So, kernel function `performWork<<<2, 4>>>` actually says, the host assigns work to 2 blocks, with 4 threads each. Now you can explain why we have seen two echoes in our first CUDA program.
 
@@ -142,7 +142,7 @@ int main() {
 
 which gives the output:
 
-![image-20240705120802161](image-20240705120802161.png)
+![fundamentals-of-cuda/image-20240705120802161](fundamentals-of-cuda/image-20240705120802161.png)
 
 There are two more variables `gridDim.x` and `blockDim.x`, meaning the number of blocks in a grid and the number of threads in a block respectively and **corresponding** to the two parameters we passed when launched the kernel function.
 
@@ -154,7 +154,7 @@ performWork<<<dim3(2,2,1), dim3(2,2,1)>>>();
 
 The hierarchy of the configuration above will look like this:
 
-![image-20240705143206485](image-20240705143206485.png)
+![fundamentals-of-cuda/image-20240705143206485](fundamentals-of-cuda/image-20240705143206485.png)
 
 Now we can access these values with `gridDim.x`, `gridDim.y`, `gridDim.z`, `blockDim.x`, `blockDim.y`, `blockDim.z()`, `blockIdx.x`, `blockIdx.y`, `blockIdx.z`, `threadIdx.x`, `threadIdx.y`, `threadIdx.z`.
 
@@ -164,7 +164,7 @@ These values are important for many calculations, as we will discuss later with 
 
 In this section, we explain **streaming multiprocessors** (SMs) and offer a simple rule for picking proper numbers for `numberOfBlocks` and `threadsPerBlock`. 
 
-![image-20240705142714428](image-20240705142714428.png)
+![fundamentals-of-cuda/image-20240705142714428](fundamentals-of-cuda/image-20240705142714428.png)
 
 SMs are basic units that execute tasks. As shown in the figure above, blocks are scheduled to run on SMs. When the number of blocks is multiple of the number of SMs, the execution will be efficient. Therefore, we cannot hardcode `numberOfBlocks` and may  use an API to get a value for a particular machine instead. Usually, taking `numberOfBlocks` as `numberOfSMs` times 16, 32, or 64 would be a good choice.
 
@@ -192,7 +192,7 @@ some_kernel<<<numberOfBlocks, threadsPerBlock>>>();
 
 #### CUDA Streams
 
-![image-20240705155324189](image-20240705155324189.png)
+![fundamentals-of-cuda/image-20240705155324189](fundamentals-of-cuda/image-20240705155324189.png)
 
 GPU tasks are scheduled in **streams** and the kernels in one stream is **serial**. Before, we didn't specify the stream and the kernels are executed in the **default stream**. Default streaming is **blocking**. That is to mean, when there is a task scheduled in the default stream, all the tasks on the **non-default streams** will be blocked, while all the other non-default streams are **non-blocking**, allowing concurrent kernel execution. CUDA offers a stream class `cudaStream_t` and they are created with `cudaStreamCreate()` and destroyed with `cudaStreamDestroy()`. As we didn't mention before, a kernel configuration actually accepts 4 parameters, `numberOfBlocks`, `threadsPerBlock`, `sharedMemoryBytes`, and `stream`. We just left the latter 2 parameter in defaults before. Here is an example with concurrent streams.
 
@@ -236,7 +236,7 @@ cudaFree(array);
 
 #### Reduce Page Faults
 
-![image-20240705151808466](image-20240705151808466.png)
+![fundamentals-of-cuda/image-20240705151808466](fundamentals-of-cuda/image-20240705151808466.png)
 
 When UM was initially allocated, it may not be resident on CPU or GPU. If the memory was first initialized by CPU then GPU, a [page fault](https://en.wikipedia.org/wiki/Page_fault) occurs. Memory will be transferred from host to device and slow down the tasks. Similarly, if UM was initialized on GPU and then accessed by CPU, a page fault occurs and memory transfer begins. The place memory is resident on depends on the last access. When a page fault is present, memory is transferred is small batch size. If we can predict a page fault, we can transfer  the corresponding memory in advance with bigger batch size to increase the efficiency. CUDA offers an API called `cudaPrefetch` to perform such behaviors. Here is an example.
 
@@ -317,7 +317,7 @@ Note that `cudaMemcpy` first accepts the destination pointer then source pointer
 
 In the last example, memory copy starts after kernel finishes. To optimize the process, we can start asynchronous (or concurrent) memory copying right after a part of kernel finishes.
 
-![image-20240705163448580](image-20240705163448580.png)
+![fundamentals-of-cuda/image-20240705163448580](fundamentals-of-cuda/image-20240705163448580.png)
 
 An simple approach is to divide the kernel in several segments. A segment of memory copying starts right after a segment of kernel finishes. We will refactor the former vector addition program and take it as an example.
 
@@ -512,7 +512,7 @@ Then, we can profile the running information of our CUDA program. Here we take v
 
 A part of printed information is pasted below:
 
-![image-20240705174250537](image-20240705174250537.png)
+![fundamentals-of-cuda/image-20240705174250537](fundamentals-of-cuda/image-20240705174250537.png)
 
 Here we can trace the running time of kernels and the memory behavior. You can compare the results of different `numberOfBlocks` and see what kind of `memcpy` page faults will bring about.
 
